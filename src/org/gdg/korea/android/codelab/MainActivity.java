@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.simonvt.menudrawer.MenuDrawer;
 
+import org.gdg.korea.android.codelab.MenuAdapter.Category;
 import org.gdg.korea.android.codelab.YouTubeChannelClient.Callbacks;
 import org.gdg.korea.android.oscl1.R;
 
@@ -33,19 +34,19 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	private static final String CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw";
 
 	private ActionBar mActionBar;
-	MenuDrawer mDrawer;
-	private ListView mMenuList;
-	private MenuAdapter mMenuAdapter;
+	private MenuDrawer mDrawer;
+	private int mActivePosition = -1;
 
+	private ListView mMenuList;
 	private ListView mPlayListView;
+	
+	private MenuAdapter mMenuAdapter;
 	private PlayListItemAdapter mPlayListItemAdapter;
-	int mActivePosition = -1;
 
 	private YouTubeChannelClient mClient;
 
 	private static ImageManager sImageManager;
-
-	ImageTagFactory mTagFactory;
+	private ImageTagFactory mTagFactory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +72,9 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mPlayListView.setOnItemClickListener(mPlayListItemClickListener);
 
 		LoaderSettings settings = new SettingsBuilder()
-		.withDisconnectOnEveryCall(true).build(this);
+		.withDisconnectOnEveryCall(true)
+		.build(this);
+		
 		sImageManager = new ImageManager(this, settings);
 	}
 	
@@ -101,7 +104,6 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				long id
 				) {
 			PlaylistItem pl = (PlaylistItem) parent.getItemAtPosition(position);
-
 			Intent intent = YouTubeStandalonePlayer.createVideoIntent(MainActivity.this, API_KEY, pl.getSnippet().getResourceId().getVideoId());
 			startActivity(intent);
 		}
@@ -157,15 +159,6 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				);
 
 		mClient.getPlayList(this);
-	}
-
-	static class Category {
-
-		String mTitle;
-
-		Category(String title) {
-			mTitle = title;
-		}
 	}
 
 	@Override

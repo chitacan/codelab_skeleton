@@ -1,6 +1,5 @@
 package org.gdg.korea.android.codelab;
 
-import org.gdg.korea.android.codelab.MainActivity.Category;
 import org.gdg.korea.android.oscl1.R;
 
 import android.content.Context;
@@ -90,5 +89,14 @@ class MenuAdapter extends ArrayAdapter<Object> {
 			return null;
 
 		return thumb.getUrl();
+	}
+	
+	static class Category {
+
+		String mTitle;
+
+		Category(String title) {
+			mTitle = title;
+		}
 	}
 }
