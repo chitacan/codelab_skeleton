@@ -8,17 +8,12 @@ import net.simonvt.menudrawer.MenuDrawer;
 import org.gdg.korea.android.codelab.YouTubeChannelClient.Callbacks;
 import org.gdg.korea.android.oscl1.R;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -27,14 +22,9 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItem;
-import com.google.api.services.youtube.model.PlaylistItemSnippet;
-import com.google.api.services.youtube.model.PlaylistSnippet;
-import com.google.api.services.youtube.model.Thumbnail;
-import com.google.api.services.youtube.model.ThumbnailDetails;
 import com.novoda.imageloader.core.ImageManager;
 import com.novoda.imageloader.core.LoaderSettings;
 import com.novoda.imageloader.core.LoaderSettings.SettingsBuilder;
-import com.novoda.imageloader.core.model.ImageTag;
 import com.novoda.imageloader.core.model.ImageTagFactory;
 
 public class MainActivity extends SherlockActivity implements Callbacks{
@@ -43,19 +33,19 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	private static final String CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw";
 
 	private ActionBar mActionBar;
-	private MenuDrawer mDrawer;
+	MenuDrawer mDrawer;
 	private ListView mMenuList;
 	private MenuAdapter mMenuAdapter;
 
 	private ListView mPlayListView;
 	private PlayListItemAdapter mPlayListItemAdapter;
-	private int mActivePosition = -1;
+	int mActivePosition = -1;
 
 	private YouTubeChannelClient mClient;
 
 	private static ImageManager sImageManager;
 
-	private ImageTagFactory mTagFactory;
+	ImageTagFactory mTagFactory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +63,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				R.drawable.ic_action_select_all_dark
 				);
 
-		mMenuAdapter = new MenuAdapter(this, R.id.row_title);
+		mMenuAdapter = new MenuAdapter(this, this, R.id.row_title);
 		mMenuList.setAdapter(mMenuAdapter);
 		mMenuList.setOnItemClickListener(mMenuItemClickListener);
 
@@ -83,7 +73,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 
 		mPlayListView = (ListView) findViewById(R.id.list);
 
-		mPlayListItemAdapter = new PlayListItemAdapter(this, R.id.row_title);
+		mPlayListItemAdapter = new PlayListItemAdapter(this, this, R.id.row_title);
 		mPlayListView.setAdapter(mPlayListItemAdapter);
 		mPlayListView.setOnItemClickListener(mPlayListItemClickListener);
 
@@ -164,146 +154,12 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mClient.getPlayList(this);
 	}
 
-	private static class Category {
+	static class Category {
 
 		String mTitle;
 
 		Category(String title) {
 			mTitle = title;
-		}
-	}
-
-	private class PlayListItemAdapter extends ArrayAdapter<Object> {
-
-		public PlayListItemAdapter(Context context, int textViewResourceId) {
-			super(context, textViewResourceId);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			Object item = getItem(position);
-
-			if (v == null)
-				v = getLayoutInflater().inflate(
-						R.layout.menu_playlist_item, 
-						parent, 
-						false
-						);
-
-			PlaylistItem pItem = (PlaylistItem) item;
-
-			TextView tv  = (TextView)  v.findViewById(R.id.row_title);
-			ImageView im = (ImageView) v.findViewById(R.id.row_thumbnail);
-
-			tv.setText(pItem.getSnippet().getTitle());
-
-			String url = getThumbnailUrl(pItem.getSnippet());
-			ImageTag tag = 	mTagFactory.build(url, MainActivity.this);
-			im.setTag(tag);
-
-			getImageManager().getLoader().load(im);
-
-			v.setTag(R.id.mdActiveViewPosition, position);
-
-			if (position == mActivePosition) {
-				mDrawer.setActiveView(v, position);
-			}
-
-			return v;
-		}
-
-		private String getThumbnailUrl(PlaylistItemSnippet snippet) {
-			ThumbnailDetails thumbs = snippet.getThumbnails();
-			Thumbnail thumb = thumbs.getDefault();
-			if (thumb == null)
-				return null;
-
-			return thumb.getUrl();
-		}
-	}
-
-	private class MenuAdapter extends ArrayAdapter<Object> {
-
-		public MenuAdapter(Context context, int textViewResourceId) {
-			super(context, textViewResourceId);
-		}
-
-		@Override
-		public boolean isEnabled(int position) {
-			Object item = getItem(position);
-			if (item instanceof Playlist)
-				return true;
-			else 
-				return false;
-		}
-
-		@Override
-		public boolean areAllItemsEnabled() {
-			return false;
-		}
-
-		@Override
-		public View getView(
-				int position, 
-				View convertView, 
-				ViewGroup parent
-				) {
-			View v = convertView;
-			Object item = getItem(position);
-
-			if (item instanceof Category) {
-				v = getLayoutInflater().inflate(
-						R.layout.menu_row_category, 
-						parent, 
-						false
-						);
-
-				((TextView) v).setText(((Category) item).mTitle); 
-
-			} else if (item instanceof Playlist) {
-				v = getLayoutInflater().inflate(
-						R.layout.menu_playlist, 
-						parent, 
-						false
-						);
-
-				Playlist pItem = (Playlist) item;
-
-				TextView tv  = (TextView)  v.findViewById(R.id.row_title);
-				ImageView im = (ImageView) v.findViewById(R.id.row_thumbnail);
-
-				tv.setText(pItem.getSnippet().getTitle());
-
-				String url = getThumbnailUrl(pItem.getSnippet());
-				ImageTag tag = 	mTagFactory.build(url, MainActivity.this);
-				im.setTag(tag);
-
-				getImageManager().getLoader().load(im);
-
-				v.setTag(R.id.mdActiveViewPosition, position);
-
-				if (position == mActivePosition) {
-					mDrawer.setActiveView(v, position);
-				}
-			}
-
-			v.setTag(R.id.mdActiveViewPosition, position);
-
-			if (position == mActivePosition) {
-				mDrawer.setActiveView(v, position);
-			}
-
-			return v;
-		}
-
-		private String getThumbnailUrl(PlaylistSnippet snippet) {
-			ThumbnailDetails thumbs = snippet.getThumbnails();
-			Thumbnail thumb = thumbs.getDefault();
-			if (thumb == null)
-				return null;
-
-			return thumb.getUrl();
 		}
 	}
 
