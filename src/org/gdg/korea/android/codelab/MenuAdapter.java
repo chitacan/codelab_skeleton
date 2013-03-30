@@ -15,17 +15,15 @@ import com.google.api.services.youtube.model.PlaylistSnippet;
 import com.google.api.services.youtube.model.Thumbnail;
 import com.google.api.services.youtube.model.ThumbnailDetails;
 import com.novoda.imageloader.core.model.ImageTag;
+import com.novoda.imageloader.core.model.ImageTagFactory;
 
 class MenuAdapter extends ArrayAdapter<Object> {
 
-	/**
-	 * 
-	 */
-	private final MainActivity mainActivity;
+	private ImageTagFactory mTagFactory;
 
-	public MenuAdapter(MainActivity mainActivity, Context context, int textViewResourceId) {
+	public MenuAdapter(Context context, int textViewResourceId, ImageTagFactory factory) {
 		super(context, textViewResourceId);
-		this.mainActivity = mainActivity;
+		mTagFactory = factory;
 	}
 
 	@Override
@@ -52,19 +50,19 @@ class MenuAdapter extends ArrayAdapter<Object> {
 		Object item = getItem(position);
 
 		if (item instanceof Category) {
-			v = this.mainActivity.getLayoutInflater().inflate(
+			v = View.inflate(
+					getContext(),
 					R.layout.menu_row_category, 
-					parent, 
-					false
+					null
 					);
 
 			((TextView) v).setText(((Category) item).mTitle); 
 
 		} else if (item instanceof Playlist) {
-			v = this.mainActivity.getLayoutInflater().inflate(
+			v = View.inflate(
+					getContext(),
 					R.layout.menu_playlist, 
-					parent, 
-					false
+					null
 					);
 
 			Playlist pItem = (Playlist) item;
@@ -75,22 +73,11 @@ class MenuAdapter extends ArrayAdapter<Object> {
 			tv.setText(pItem.getSnippet().getTitle());
 
 			String url = getThumbnailUrl(pItem.getSnippet());
-			ImageTag tag = 	this.mainActivity.mTagFactory.build(url, this.mainActivity);
+			ImageTag tag = 	mTagFactory.build(url, getContext());
 			im.setTag(tag);
 
 			MainActivity.getImageManager().getLoader().load(im);
 
-			v.setTag(R.id.mdActiveViewPosition, position);
-
-			if (position == this.mainActivity.mActivePosition) {
-				this.mainActivity.mDrawer.setActiveView(v, position);
-			}
-		}
-
-		v.setTag(R.id.mdActiveViewPosition, position);
-
-		if (position == this.mainActivity.mActivePosition) {
-			this.mainActivity.mDrawer.setActiveView(v, position);
 		}
 
 		return v;

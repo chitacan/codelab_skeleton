@@ -56,20 +56,13 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mActionBar.setSubtitle("gdg code lab");
 		mActionBar.setDisplayHomeAsUpEnabled(true);
 
-		mMenuList = new ListView(this);
 
 		mTagFactory = ImageTagFactory.newInstance(
 				MainActivity.this,
 				R.drawable.ic_action_select_all_dark
 				);
-
-		mMenuAdapter = new MenuAdapter(this, this, R.id.row_title);
-		mMenuList.setAdapter(mMenuAdapter);
-		mMenuList.setOnItemClickListener(mMenuItemClickListener);
-
-		mDrawer = MenuDrawer.attach(this);
-		mDrawer.setContentView(R.layout.activity_main);
-		mDrawer.setMenuView(mMenuList);
+		
+		createMenu();
 
 		mPlayListView = (ListView) findViewById(R.id.list);
 
@@ -80,6 +73,18 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		LoaderSettings settings = new SettingsBuilder()
 		.withDisconnectOnEveryCall(true).build(this);
 		sImageManager = new ImageManager(this, settings);
+	}
+	
+	private void createMenu() {
+		mMenuList = new ListView(this);
+		
+		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
+		mMenuList.setAdapter(mMenuAdapter);
+		mMenuList.setOnItemClickListener(mMenuItemClickListener);
+		
+		mDrawer = MenuDrawer.attach(this);
+		mDrawer.setContentView(R.layout.activity_main);
+		mDrawer.setMenuView(mMenuList);
 	}
 
 	public static final ImageManager getImageManager() {
