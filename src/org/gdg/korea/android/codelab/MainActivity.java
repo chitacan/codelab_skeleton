@@ -57,7 +57,6 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mActionBar.setSubtitle("gdg code lab");
 		mActionBar.setDisplayHomeAsUpEnabled(true);
 
-
 		mTagFactory = ImageTagFactory.newInstance(
 				MainActivity.this,
 				R.drawable.ic_action_select_all_dark
@@ -65,9 +64,8 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		
 		createMenu();
 
-		mPlayListView = (ListView) findViewById(R.id.list);
-
 		mPlayListItemAdapter = new PlayListItemAdapter(this, R.id.row_title, mTagFactory);
+		mPlayListView = (ListView) findViewById(R.id.list);
 		mPlayListView.setAdapter(mPlayListItemAdapter);
 		mPlayListView.setOnItemClickListener(mPlayListItemClickListener);
 
@@ -79,15 +77,14 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	}
 	
 	private void createMenu() {
-		mMenuList = new ListView(this);
-		
-		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
-		mMenuList.setAdapter(mMenuAdapter);
-		mMenuList.setOnItemClickListener(mMenuItemClickListener);
-		
 		mDrawer = MenuDrawer.attach(this);
 		mDrawer.setContentView(R.layout.activity_main);
-		mDrawer.setMenuView(mMenuList);
+		mDrawer.setMenuView(R.layout.menu);
+		
+		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
+		mMenuList = (ListView) findViewById(R.id.menu_list);		
+		mMenuList.setAdapter(mMenuAdapter);
+		mMenuList.setOnItemClickListener(mMenuItemClickListener);
 	}
 
 	public static final ImageManager getImageManager() {
@@ -104,7 +101,11 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				long id
 				) {
 			PlaylistItem pl = (PlaylistItem) parent.getItemAtPosition(position);
-			Intent intent = YouTubeStandalonePlayer.createVideoIntent(MainActivity.this, API_KEY, pl.getSnippet().getResourceId().getVideoId());
+			Intent intent = YouTubeStandalonePlayer.createVideoIntent(
+					MainActivity.this, 
+					API_KEY, 
+					pl.getSnippet().getResourceId().getVideoId()
+					);
 			startActivity(intent);
 		}
 	};
