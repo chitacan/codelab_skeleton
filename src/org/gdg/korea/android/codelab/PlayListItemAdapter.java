@@ -34,7 +34,7 @@ class PlayListItemAdapter extends ArrayAdapter<Object> {
 			v = View.inflate(
 					getContext(),
 					R.layout.menu_playlist_item, 
-					parent
+					null
 					);
 
 		PlaylistItem pItem = (PlaylistItem) item;
