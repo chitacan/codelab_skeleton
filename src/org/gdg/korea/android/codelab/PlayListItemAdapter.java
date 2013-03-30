@@ -14,17 +14,15 @@ import com.google.api.services.youtube.model.PlaylistItemSnippet;
 import com.google.api.services.youtube.model.Thumbnail;
 import com.google.api.services.youtube.model.ThumbnailDetails;
 import com.novoda.imageloader.core.model.ImageTag;
+import com.novoda.imageloader.core.model.ImageTagFactory;
 
 class PlayListItemAdapter extends ArrayAdapter<Object> {
 
-	/**
-	 * 
-	 */
-	private final MainActivity mainActivity;
+	private ImageTagFactory mTagFactory;
 
-	public PlayListItemAdapter(MainActivity mainActivity, Context context, int textViewResourceId) {
+	public PlayListItemAdapter(Context context, int textViewResourceId, ImageTagFactory factory) {
 		super(context, textViewResourceId);
-		this.mainActivity = mainActivity;
+		mTagFactory = factory;
 	}
 
 	@Override
@@ -33,10 +31,10 @@ class PlayListItemAdapter extends ArrayAdapter<Object> {
 		Object item = getItem(position);
 
 		if (v == null)
-			v = this.mainActivity.getLayoutInflater().inflate(
+			v = View.inflate(
+					getContext(),
 					R.layout.menu_playlist_item, 
-					parent, 
-					false
+					parent
 					);
 
 		PlaylistItem pItem = (PlaylistItem) item;
@@ -47,17 +45,13 @@ class PlayListItemAdapter extends ArrayAdapter<Object> {
 		tv.setText(pItem.getSnippet().getTitle());
 
 		String url = getThumbnailUrl(pItem.getSnippet());
-		ImageTag tag = 	this.mainActivity.mTagFactory.build(url, this.mainActivity);
+		ImageTag tag = 	mTagFactory.build(url, getContext());
 		im.setTag(tag);
 
 		MainActivity.getImageManager().getLoader().load(im);
 
 		v.setTag(R.id.mdActiveViewPosition, position);
-
-		if (position == this.mainActivity.mActivePosition) {
-			this.mainActivity.mDrawer.setActiveView(v, position);
-		}
-
+		
 		return v;
 	}
 

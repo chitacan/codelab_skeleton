@@ -73,7 +73,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 
 		mPlayListView = (ListView) findViewById(R.id.list);
 
-		mPlayListItemAdapter = new PlayListItemAdapter(this, this, R.id.row_title);
+		mPlayListItemAdapter = new PlayListItemAdapter(this, R.id.row_title, mTagFactory);
 		mPlayListView.setAdapter(mPlayListItemAdapter);
 		mPlayListView.setOnItemClickListener(mPlayListItemClickListener);
 
