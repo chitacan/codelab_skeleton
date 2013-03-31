@@ -4,14 +4,14 @@ package org.gdg.korea.android.codelab;
 import java.util.List;
 
 import net.simonvt.menudrawer.MenuDrawer;
+import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
 
-import org.gdg.korea.android.codelab.MenuAdapter.Category;
 import org.gdg.korea.android.codelab.YouTubeChannelClient.Callbacks;
 import org.gdg.korea.android.oscl1.R;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -20,7 +20,6 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.google.api.services.youtube.model.Playlist;
@@ -30,10 +29,14 @@ import com.novoda.imageloader.core.LoaderSettings;
 import com.novoda.imageloader.core.LoaderSettings.SettingsBuilder;
 import com.novoda.imageloader.core.model.ImageTagFactory;
 
-public class MainActivity extends SherlockActivity implements Callbacks{
+public class MainActivity extends SherlockActivity 
+implements Callbacks, OnDrawerStateChangeListener{
 
 	private static final String API_KEY = "AIzaSyDLp9N7LvofGKKowD2FmtjRHoAGeCtURGk";
 	private static final String CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw";
+	
+	private static final String PREF_NAME = "pref";
+	private static final String PREF_PLAYLIST_ITEMID = "playlistitemid";
 
 	private ActionBar mActionBar;
 	private MenuDrawer mDrawer;
@@ -78,12 +81,18 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		.build(this);
 		
 		sImageManager = new ImageManager(this, settings);
+		
+		mYoutubeClient = YouTubeChannelClient.newYouTubeChannelClient(
+				API_KEY, 
+				CHANNEL_ID
+				);
 	}
 	
 	private void createDrawer() {
 		mDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_CONTENT);
 		mDrawer.setContentView(R.layout.activity_main);
 		mDrawer.setMenuView(R.layout.menu);
+		mDrawer.setOnDrawerStateChangeListener(this);
 	}
 		
 	private void createMenu() {
@@ -158,30 +167,15 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 			toggleContentProgress(true);
 			Playlist item = (Playlist) mMenuAdapter.getItem(position);
 			mYoutubeClient.getPlaylistItem(item.getId(), MainActivity.this);
+			cachePlaylistItem(item);
 			mDrawer.setActiveView(view, position);
 			mDrawer.closeMenu();
 		}
 	};
 
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("Get Playlist").setShowAsAction(
-				MenuItem.SHOW_AS_ACTION_IF_ROOM | 
-				MenuItem.SHOW_AS_ACTION_WITH_TEXT
-				);
-
-		return super.onCreateOptionsMenu(menu);
-	};
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d("chitacan", ""+item.getItemId());
 		switch (item.getItemId()) {
-		case 0:
-			if(!mDrawer.isMenuVisible())
-				mDrawer.openMenu();
-			toggleMenuProgress(true);
-			getPlaylist();
-			break;
 		case android.R.id.home:
 			mDrawer.toggleMenu();
 			break;
@@ -191,20 +185,39 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onResume() {
+		if (mPlayListItemAdapter.isEmpty()) {
+			SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+			String cachedItemId = pref.getString(PREF_PLAYLIST_ITEMID, "");
+			if (!cachedItemId.isEmpty()) {
+				toggleContentProgress(true);
+				mYoutubeClient.getPlaylistItem(cachedItemId, MainActivity.this);
+			}
+		}
+		super.onResume();
+	}
 
-	protected void getPlaylist() {
-		mYoutubeClient = YouTubeChannelClient.newYouTubeChannelClient(
-				API_KEY, 
-				CHANNEL_ID
-				);
-
-		mYoutubeClient.getPlayList(this);
+	protected void cachePlaylistItem(Playlist item) {
+		SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = pref.edit();
+		editor.putString(PREF_PLAYLIST_ITEMID, item.getId());
+		editor.commit();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		final int state = mDrawer.getDrawerState();
+		if (state == MenuDrawer.STATE_OPEN || 
+			state == MenuDrawer.STATE_OPENING)
+			mDrawer.closeMenu();
+		super.onBackPressed();
 	}
 
 	@Override
 	public void onLoadPlaylist(List<Playlist> playlist) {
 		mMenuAdapter.clear();
-		mMenuAdapter.add(new Category("Google Developers"));
 		mMenuAdapter.addAll(playlist);
 		mMenuAdapter.notifyDataSetChanged();
 		toggleMenuProgress(false);
@@ -218,6 +231,18 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mPlayListItemAdapter.addAll(playlistItem);
 		mPlayListItemAdapter.notifyDataSetChanged();
 		toggleContentProgress(false);
+	}
+
+	@Override
+	public void onDrawerStateChange(int oldState, int newState) {
+		if (oldState == MenuDrawer.STATE_DRAGGING && 
+			newState == MenuDrawer.STATE_OPENING) {
+			
+			if (mMenuAdapter.isEmpty()) {
+				toggleMenuProgress(true);
+				mYoutubeClient.getPlayList(this);;
+			}
+		}
 	}
 
 }

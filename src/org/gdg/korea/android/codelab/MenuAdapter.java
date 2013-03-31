@@ -21,20 +21,20 @@ import com.novoda.imageloader.core.model.ImageTagFactory;
 class MenuAdapter extends ArrayAdapter<Object> {
 
 	private ImageTagFactory mTagFactory;
-	
+
 	private MenuDrawer mDrawer;
-	
+
 	private int mActivePosition = -1;
 
 	public MenuAdapter(Context context, int textViewResourceId, ImageTagFactory factory) {
 		super(context, textViewResourceId);
 		mTagFactory = factory;
 	}
-	
+
 	public void setMenuDrawer(MenuDrawer drawer) {
 		mDrawer = drawer;
 	}
-	
+
 	public void setActivePosition(int position) {
 		mActivePosition = position;
 	}
@@ -57,42 +57,31 @@ class MenuAdapter extends ArrayAdapter<Object> {
 		View v = convertView;
 		Object item = getItem(position);
 
-		if (item instanceof Category) {
-			v = View.inflate(
-					getContext(),
-					R.layout.menu_row_category, 
-					null
-					);
-
-			((TextView) v).setText(((Category) item).mTitle); 
-
-		} else {
+		if (v == null)
 			v = View.inflate(
 					getContext(),
 					R.layout.menu_playlist, 
 					null
 					);
 
-			Playlist pItem = (Playlist) item;
+		Playlist pItem = (Playlist) item;
 
-			TextView tv  = (TextView)  v.findViewById(R.id.row_title);
-			ImageView im = (ImageView) v.findViewById(R.id.row_thumbnail);
+		TextView tv  = (TextView)  v.findViewById(R.id.row_title);
+		ImageView im = (ImageView) v.findViewById(R.id.row_thumbnail);
 
-			tv.setText(pItem.getSnippet().getTitle());
+		tv.setText(pItem.getSnippet().getTitle());
 
-			String url = getThumbnailUrl(pItem.getSnippet());
-			ImageTag tag = 	mTagFactory.build(url, getContext());
-			im.setTag(tag);
+		String url = getThumbnailUrl(pItem.getSnippet());
+		ImageTag tag = 	mTagFactory.build(url, getContext());
+		im.setTag(tag);
 
-			MainActivity.getImageManager().getLoader().load(im);
-
-		}
+		MainActivity.getImageManager().getLoader().load(im);
 
 		v.setTag(R.id.mdActiveViewPosition, position);
-		
+
 		if (mActivePosition == position)
 			mDrawer.setActiveView(v, position);
-		
+
 		return v;
 	}
 
@@ -103,14 +92,5 @@ class MenuAdapter extends ArrayAdapter<Object> {
 			return null;
 
 		return thumb.getUrl();
-	}
-	
-	static class Category {
-
-		String mTitle;
-
-		Category(String title) {
-			mTitle = title;
-		}
 	}
 }
