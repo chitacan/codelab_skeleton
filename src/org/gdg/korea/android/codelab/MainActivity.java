@@ -37,12 +37,14 @@ implements Callbacks, OnDrawerStateChangeListener{
 	
 	private static final String PREF_NAME = "pref";
 	private static final String PREF_PLAYLIST_ITEMID = "playlistitemid";
+	private static final String PREF_PLAYLIST_TITLE = "playlistTitle";
 
 	private ActionBar mActionBar;
 	private MenuDrawer mDrawer;
 
 	private View mMenuProgress;
 	private View mContentProgress;
+	private View mEmptyView;
 	private ListView mMenuList;
 	private ListView mPlayListView;
 	
@@ -59,8 +61,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 		super.onCreate(savedInstanceState);
 
 		mActionBar = getSupportActionBar();
-		mActionBar.setTitle("Code Lab");
-		mActionBar.setSubtitle("gdg code lab");
+		mActionBar.setTitle("Google Developers Video");
 		mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		mTagFactory = ImageTagFactory.newInstance(
@@ -119,6 +120,13 @@ implements Callbacks, OnDrawerStateChangeListener{
 		return sImageManager;
 	}
 	
+	private void toggleEmptyView(boolean isEmpty) {
+		if (mEmptyView == null)
+			mEmptyView = findViewById(R.id.content_empy);
+		
+		mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+	}
+	
 	private void toggleMenuProgress(boolean isInProgress) {
 		if (mMenuProgress == null)
 			mMenuProgress = findViewById(R.id.menu_progress);
@@ -165,7 +173,9 @@ implements Callbacks, OnDrawerStateChangeListener{
 				) {
 			mMenuAdapter.setActivePosition(position);
 			toggleContentProgress(true);
+			toggleEmptyView(false);
 			Playlist item = (Playlist) mMenuAdapter.getItem(position);
+			mActionBar.setSubtitle(item.getSnippet().getTitle());
 			mYoutubeClient.getPlaylistItem(item.getId(), MainActivity.this);
 			cachePlaylistItem(item);
 			mDrawer.setActiveView(view, position);
@@ -191,9 +201,14 @@ implements Callbacks, OnDrawerStateChangeListener{
 		if (mPlayListItemAdapter.isEmpty()) {
 			SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
 			String cachedItemId = pref.getString(PREF_PLAYLIST_ITEMID, "");
+			String title = pref.getString(PREF_PLAYLIST_TITLE, "");
 			if (!cachedItemId.isEmpty()) {
 				toggleContentProgress(true);
+				mActionBar.setSubtitle(title);
 				mYoutubeClient.getPlaylistItem(cachedItemId, MainActivity.this);
+			} else {
+				mDrawer.openMenu();
+				toggleEmptyView(true);
 			}
 		}
 		super.onResume();
@@ -203,6 +218,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 		SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
 		SharedPreferences.Editor editor = pref.edit();
 		editor.putString(PREF_PLAYLIST_ITEMID, item.getId());
+		editor.putString(PREF_PLAYLIST_TITLE, item.getSnippet().getTitle());
 		editor.commit();
 	}
 	
@@ -210,8 +226,11 @@ implements Callbacks, OnDrawerStateChangeListener{
 	public void onBackPressed() {
 		final int state = mDrawer.getDrawerState();
 		if (state == MenuDrawer.STATE_OPEN || 
-			state == MenuDrawer.STATE_OPENING)
+			state == MenuDrawer.STATE_OPENING) {
 			mDrawer.closeMenu();
+			return;
+		}
+		
 		super.onBackPressed();
 	}
 
@@ -235,12 +254,16 @@ implements Callbacks, OnDrawerStateChangeListener{
 
 	@Override
 	public void onDrawerStateChange(int oldState, int newState) {
-		if (oldState == MenuDrawer.STATE_DRAGGING && 
-			newState == MenuDrawer.STATE_OPENING) {
+		if ((oldState == MenuDrawer.STATE_DRAGGING && 
+			newState == MenuDrawer.STATE_OPENING) || 
+			(oldState == MenuDrawer.STATE_DRAGGING && 
+			newState == MenuDrawer.STATE_OPENING) ||
+			(oldState == MenuDrawer.STATE_CLOSED && 
+			newState == MenuDrawer.STATE_OPENING)) {
 			
 			if (mMenuAdapter.isEmpty()) {
 				toggleMenuProgress(true);
-				mYoutubeClient.getPlayList(this);;
+				mYoutubeClient.getPlayList(this);
 			}
 		}
 	}

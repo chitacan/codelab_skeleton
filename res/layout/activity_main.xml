@@ -10,6 +10,28 @@
         android:layout_height="match_parent" />
 
     <LinearLayout
+        android:id="@+id/content_empy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/left" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:text="open menu to select playlist"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/content_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
