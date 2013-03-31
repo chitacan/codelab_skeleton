@@ -1,5 +1,7 @@
 package org.gdg.korea.android.codelab;
 
+import net.simonvt.menudrawer.MenuDrawer;
+
 import org.gdg.korea.android.oscl1.R;
 
 import android.content.Context;
@@ -19,10 +21,22 @@ import com.novoda.imageloader.core.model.ImageTagFactory;
 class MenuAdapter extends ArrayAdapter<Object> {
 
 	private ImageTagFactory mTagFactory;
+	
+	private MenuDrawer mDrawer;
+	
+	private int mActivePosition = -1;
 
 	public MenuAdapter(Context context, int textViewResourceId, ImageTagFactory factory) {
 		super(context, textViewResourceId);
 		mTagFactory = factory;
+	}
+	
+	public void setMenuDrawer(MenuDrawer drawer) {
+		mDrawer = drawer;
+	}
+	
+	public void setActivePosition(int position) {
+		mActivePosition = position;
 	}
 
 	@Override
@@ -32,11 +46,6 @@ class MenuAdapter extends ArrayAdapter<Object> {
 			return true;
 		else 
 			return false;
-	}
-
-	@Override
-	public boolean areAllItemsEnabled() {
-		return false;
 	}
 
 	@Override
@@ -57,7 +66,7 @@ class MenuAdapter extends ArrayAdapter<Object> {
 
 			((TextView) v).setText(((Category) item).mTitle); 
 
-		} else if (item instanceof Playlist) {
+		} else {
 			v = View.inflate(
 					getContext(),
 					R.layout.menu_playlist, 
@@ -79,6 +88,11 @@ class MenuAdapter extends ArrayAdapter<Object> {
 
 		}
 
+		v.setTag(R.id.mdActiveViewPosition, position);
+		
+		if (mActivePosition == position)
+			mDrawer.setActiveView(v, position);
+		
 		return v;
 	}
 

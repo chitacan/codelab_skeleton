@@ -50,8 +50,6 @@ class PlayListItemAdapter extends ArrayAdapter<Object> {
 
 		MainActivity.getImageManager().getLoader().load(im);
 
-		v.setTag(R.id.mdActiveViewPosition, position);
-		
 		return v;
 	}
 

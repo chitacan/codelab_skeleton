@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -80,16 +82,29 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	}
 	
 	private void createDrawer() {
-		mDrawer = MenuDrawer.attach(this);
+		mDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_CONTENT);
 		mDrawer.setContentView(R.layout.activity_main);
 		mDrawer.setMenuView(R.layout.menu);
 	}
-	
+		
 	private void createMenu() {
 		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
+		mMenuAdapter.setMenuDrawer(mDrawer);
 		mMenuList = (ListView) findViewById(R.id.menu_list);		
 		mMenuList.setAdapter(mMenuAdapter);
 		mMenuList.setOnItemClickListener(mMenuItemClickListener);
+		mMenuList.setOnScrollListener(new OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				mMenuList.invalidate();
+			}
+		});
 	}
 
 	public static final ImageManager getImageManager() {
@@ -140,9 +155,12 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				int position, 
 				long id
 				) {
+			mActivePosition = position;
+			mMenuAdapter.setActivePosition(position);
 			toggleContentProgress(true);
 			Playlist item = (Playlist) mMenuAdapter.getItem(position);
 			mClient.getPlaylistItem(item.getId(), MainActivity.this);
+			mDrawer.setActiveView(view, position);
 			mDrawer.closeMenu();
 		}
 	};
