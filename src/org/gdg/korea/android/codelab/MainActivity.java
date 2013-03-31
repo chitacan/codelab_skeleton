@@ -37,6 +37,8 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	private MenuDrawer mDrawer;
 	private int mActivePosition = -1;
 
+	private View mMenuProgress;
+	private View mContentProgress;
 	private ListView mMenuList;
 	private ListView mPlayListView;
 	
@@ -62,6 +64,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				R.drawable.ic_action_select_all_dark
 				);
 		
+		createDrawer();
 		createMenu();
 
 		mPlayListItemAdapter = new PlayListItemAdapter(this, R.id.row_title, mTagFactory);
@@ -76,11 +79,13 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		sImageManager = new ImageManager(this, settings);
 	}
 	
-	private void createMenu() {
+	private void createDrawer() {
 		mDrawer = MenuDrawer.attach(this);
 		mDrawer.setContentView(R.layout.activity_main);
 		mDrawer.setMenuView(R.layout.menu);
-		
+	}
+	
+	private void createMenu() {
 		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
 		mMenuList = (ListView) findViewById(R.id.menu_list);		
 		mMenuList.setAdapter(mMenuAdapter);
@@ -89,6 +94,22 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 
 	public static final ImageManager getImageManager() {
 		return sImageManager;
+	}
+	
+	private void toggleMenuProgress(boolean isInProgress) {
+		if (mMenuProgress == null)
+			mMenuProgress = findViewById(R.id.menu_progress);
+		
+		mMenuProgress.setVisibility(isInProgress ? View.VISIBLE : View.GONE);
+		mMenuList.setVisibility(isInProgress ? View.GONE : View.VISIBLE);
+	}
+	
+	private void toggleContentProgress(boolean isInProgress) {
+		if (mContentProgress == null)
+			mContentProgress = findViewById(R.id.content_progress);
+		
+		mContentProgress.setVisibility(isInProgress ? View.VISIBLE : View.GONE);
+		mPlayListView.setVisibility(isInProgress ? View.GONE : View.VISIBLE );
 	}
 
 	private AdapterView.OnItemClickListener mPlayListItemClickListener = 
@@ -119,6 +140,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				int position, 
 				long id
 				) {
+			toggleContentProgress(true);
 			Playlist item = (Playlist) mMenuAdapter.getItem(position);
 			mClient.getPlaylistItem(item.getId(), MainActivity.this);
 			mDrawer.closeMenu();
@@ -141,6 +163,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		case 0:
 			if(!mDrawer.isMenuVisible())
 				mDrawer.openMenu();
+			toggleMenuProgress(true);
 			getPlaylist();
 			break;
 		case android.R.id.home:
@@ -168,6 +191,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mMenuAdapter.add(new Category("Google Developers"));
 		mMenuAdapter.addAll(playlist);
 		mMenuAdapter.notifyDataSetChanged();
+		toggleMenuProgress(false);
 	}
 
 	@Override
@@ -177,6 +201,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 		mPlayListItemAdapter.clear();
 		mPlayListItemAdapter.addAll(playlistItem);
 		mPlayListItemAdapter.notifyDataSetChanged();
+		toggleContentProgress(false);
 	}
 
 }

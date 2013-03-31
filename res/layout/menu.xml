@@ -2,12 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="12dip"
+    android:paddingRight="12dip"
+    android:paddingTop="10dip"
     tools:context=".MainActivity" >
 
     <ListView
         android:id="@+id/menu_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:dividerHeight="1px"
+        android:divider="#818181" />
 
     <LinearLayout
         android:id="@+id/menu_progress"
@@ -15,7 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone" >
 
         <ProgressBar
             android:layout_width="wrap_content"
