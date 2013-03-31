@@ -34,7 +34,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 
 	private static final String API_KEY = "AIzaSyDLp9N7LvofGKKowD2FmtjRHoAGeCtURGk";
 	private static final String CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw";
-	
+
 	private static final String PREF_NAME = "pref";
 	private static final String PREF_PLAYLIST_ITEMID = "playlistitemid";
 	private static final String PREF_PLAYLIST_TITLE = "playlistTitle";
@@ -47,7 +47,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 	private View mEmptyView;
 	private ListView mMenuList;
 	private ListView mPlayListView;
-	
+
 	private MenuAdapter mMenuAdapter;
 	private PlayListItemAdapter mPlayListItemAdapter;
 
@@ -68,7 +68,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 				MainActivity.this,
 				R.drawable.ic_action_select_all_dark
 				);
-		
+
 		createDrawer();
 		createMenu();
 
@@ -80,22 +80,22 @@ implements Callbacks, OnDrawerStateChangeListener{
 		LoaderSettings settings = new SettingsBuilder()
 		.withDisconnectOnEveryCall(true)
 		.build(this);
-		
+
 		sImageManager = new ImageManager(this, settings);
-		
+
 		mYoutubeClient = YouTubeChannelClient.newYouTubeChannelClient(
 				API_KEY, 
 				CHANNEL_ID
 				);
 	}
-	
+
 	private void createDrawer() {
 		mDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_CONTENT);
 		mDrawer.setContentView(R.layout.activity_main);
 		mDrawer.setMenuView(R.layout.menu);
 		mDrawer.setOnDrawerStateChangeListener(this);
 	}
-		
+
 	private void createMenu() {
 		mMenuAdapter = new MenuAdapter(this, R.id.row_title, mTagFactory);
 		mMenuAdapter.setMenuDrawer(mDrawer);
@@ -103,11 +103,11 @@ implements Callbacks, OnDrawerStateChangeListener{
 		mMenuList.setAdapter(mMenuAdapter);
 		mMenuList.setOnItemClickListener(mMenuItemClickListener);
 		mMenuList.setOnScrollListener(new OnScrollListener() {
-			
+
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
 			}
-			
+
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
@@ -119,26 +119,26 @@ implements Callbacks, OnDrawerStateChangeListener{
 	public static final ImageManager getImageManager() {
 		return sImageManager;
 	}
-	
+
 	private void toggleEmptyView(boolean isEmpty) {
 		if (mEmptyView == null)
 			mEmptyView = findViewById(R.id.content_empy);
-		
+
 		mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
 	}
-	
+
 	private void toggleMenuProgress(boolean isInProgress) {
 		if (mMenuProgress == null)
 			mMenuProgress = findViewById(R.id.menu_progress);
-		
+
 		mMenuProgress.setVisibility(isInProgress ? View.VISIBLE : View.GONE);
 		mMenuList.setVisibility(isInProgress ? View.GONE : View.VISIBLE);
 	}
-	
+
 	private void toggleContentProgress(boolean isInProgress) {
 		if (mContentProgress == null)
 			mContentProgress = findViewById(R.id.content_progress);
-		
+
 		mContentProgress.setVisibility(isInProgress ? View.VISIBLE : View.GONE);
 		mPlayListView.setVisibility(isInProgress ? View.GONE : View.VISIBLE );
 	}
@@ -158,6 +158,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 					API_KEY, 
 					pl.getSnippet().getResourceId().getVideoId()
 					);
+
 			startActivity(intent);
 		}
 	};
@@ -195,7 +196,7 @@ implements Callbacks, OnDrawerStateChangeListener{
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		if (mPlayListItemAdapter.isEmpty()) {
@@ -221,16 +222,16 @@ implements Callbacks, OnDrawerStateChangeListener{
 		editor.putString(PREF_PLAYLIST_TITLE, item.getSnippet().getTitle());
 		editor.commit();
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		final int state = mDrawer.getDrawerState();
 		if (state == MenuDrawer.STATE_OPEN || 
-			state == MenuDrawer.STATE_OPENING) {
+				state == MenuDrawer.STATE_OPENING) {
 			mDrawer.closeMenu();
 			return;
 		}
-		
+
 		super.onBackPressed();
 	}
 
@@ -255,12 +256,12 @@ implements Callbacks, OnDrawerStateChangeListener{
 	@Override
 	public void onDrawerStateChange(int oldState, int newState) {
 		if ((oldState == MenuDrawer.STATE_DRAGGING && 
-			newState == MenuDrawer.STATE_OPENING) || 
-			(oldState == MenuDrawer.STATE_DRAGGING && 
-			newState == MenuDrawer.STATE_OPENING) ||
-			(oldState == MenuDrawer.STATE_CLOSED && 
-			newState == MenuDrawer.STATE_OPENING)) {
-			
+				newState == MenuDrawer.STATE_OPENING) || 
+				(oldState == MenuDrawer.STATE_DRAGGING && 
+				newState == MenuDrawer.STATE_OPENING) ||
+				(oldState == MenuDrawer.STATE_CLOSED && 
+				newState == MenuDrawer.STATE_OPENING)) {
+
 			if (mMenuAdapter.isEmpty()) {
 				toggleMenuProgress(true);
 				mYoutubeClient.getPlayList(this);
