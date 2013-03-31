@@ -37,7 +37,6 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 
 	private ActionBar mActionBar;
 	private MenuDrawer mDrawer;
-	private int mActivePosition = -1;
 
 	private View mMenuProgress;
 	private View mContentProgress;
@@ -47,7 +46,7 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	private MenuAdapter mMenuAdapter;
 	private PlayListItemAdapter mPlayListItemAdapter;
 
-	private YouTubeChannelClient mClient;
+	private YouTubeChannelClient mYoutubeClient;
 
 	private static ImageManager sImageManager;
 	private ImageTagFactory mTagFactory;
@@ -155,11 +154,10 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 				int position, 
 				long id
 				) {
-			mActivePosition = position;
 			mMenuAdapter.setActivePosition(position);
 			toggleContentProgress(true);
 			Playlist item = (Playlist) mMenuAdapter.getItem(position);
-			mClient.getPlaylistItem(item.getId(), MainActivity.this);
+			mYoutubeClient.getPlaylistItem(item.getId(), MainActivity.this);
 			mDrawer.setActiveView(view, position);
 			mDrawer.closeMenu();
 		}
@@ -195,12 +193,12 @@ public class MainActivity extends SherlockActivity implements Callbacks{
 	}
 
 	protected void getPlaylist() {
-		mClient = YouTubeChannelClient.newYouTubeChannelClient(
+		mYoutubeClient = YouTubeChannelClient.newYouTubeChannelClient(
 				API_KEY, 
 				CHANNEL_ID
 				);
 
-		mClient.getPlayList(this);
+		mYoutubeClient.getPlayList(this);
 	}
 
 	@Override
